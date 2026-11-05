@@ -1,0 +1,8 @@
+#settings label {
+    display: block;
+    margin-top: 10px;
+}
+#graphCanvas {
+    max-width: 100%;
+    border: 1px solid #cccccc;
+}
