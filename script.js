@@ -27,32 +27,10 @@ function calculate() {
     }
     const g = coefficients[type][order];
 
-    let html = "<h3>Woofer (low-pass)</h3>";
-    const wooferParts = [];
-    const tweeterParts = [];
-    for (let i = 0; i < g.length; i++) {
-        if (i % 2 === 0) {
-            const L = g[i] * wooferZ / w;
-            html += "<p>L" + (i + 1) + " (series): " + (L * 1000).toFixed(2) + "mH</p>";
-            wooferParts.push({ kind: "L", label: "L" + (i + 1), value: (L * 1000).toFixed(2) + "mH"});
-                } else {
-            const C = g[i] / (wooferZ * w);
-            html += "<p>C" + (i + 1) + " (parallel): " + (C * 1000000).toFixed(2) + " &micro;F</p>"; 
-            wooferParts.push({ kind: "C", label: "C" + (i + 1), value: (C * 1000000).toFixed(2) + " \u00B5F"});
-            }
-        }
-        html += "<h3>Tweeter (high-pass)</h3>";
-        for (let i = 0; i < g.length; i++) {
-            if (i % 2 === 0) {
-                const C = 1 / (g[i] * tweeterZ * w);
-                 html += "<p>C" + (i + 1) + " (series): " + (C * 1000000).toFixed(2) + "&micro;F</p>";
-                 tweeterParts.push({kind: "C", label: "C" + (i + 1), value: (C * 1000000).toFixed(2) + " \u00B5F"});
-                } else {
-                const L = tweeterZ / (g[i] * w);
-                html += "<p>L" + (i + 1) + " (parallel): " + (L * 1000).toFixed(2) + "mH</p>";
-                tweeterParts.push({kind: "L", label: "L" + (i + 1), value: (L * 1000).toFixed(2) + " mH"});
-         }
-     }
+const wooferParts = lowPassParst(g, wooferZ, w, 1);
+const tweeterParts = highPassParts(g, tweeterZ, w, 1);
+let html = partsToHtml("Woofer (low-pass)", wooferParts);
+html += partsToHtml("Tweeter (high-pass)", tweeterParts);
 
 document.getElementById("output").innerHTML = html;
 drawGrid();
@@ -73,6 +51,49 @@ const coefficients = {
         4: [1.8856, 1.5910, 0.9428, 0.3536]
     }
 };
+
+function lowPassParst(g, R, w, startNumber) {
+    const parts = [];
+    for (let i = 0; i < g.length; i++) {
+        const n = startNumber + i;
+        if (i % 2 === 0) {
+            const L = g[i] * R / w;
+            parts.push({kind: "L", series: true, label: "L" + n, value: (L * 1000).toFixed(2) + " mH"});
+        } else {
+            const C = g[i] / (R * w);
+            parts.push({ kind: "C", series: false, label: "C" + n, value: (C * 1000000).toFixed(2) + " \u00B5F"});
+        }
+    }
+    return parts;
+}
+
+function highPassParts(g, R, w, startNumber) {
+    const parts = [];
+    for (let i = 0; i < g.length; i++) {
+        const n = startNumber + i;
+        if (i % 2 === 0) {
+            const C = 1 / (g[i] * R * w);
+            parts.push({kind: "C", series: true, label: "C" + n, value: (C * 1000000).toFixed(2) + "\u00B5F" });
+        } else {
+            const L = R / (g[i] * w);
+            parts.push({ kind: "L", series: false, label: "L" + n, value: (L * 1000).toFixed(2) + " mH"});
+
+        }
+    }
+    return parts;
+}
+
+function partsToHtml(title, parts) {
+    let html = "<h3>" + title + "<h3>";
+    for (const part of parts) {
+        let position = "parallel";
+        if (part.series) {
+            position = "series";
+        }
+        html += "<p>" + part.label + "(" + position + "): " + part.value + "</p>";
+    }
+    return html;
+}
 
 const canvas = document.getElementById("graphCanvas");
 const ctx = canvas.getContext("2d");
@@ -261,7 +282,7 @@ function drawBranch(parts, y, title, name, reversed) {
     sCtx.fillText("\u2212", 12, yGround + 4);
 
     for (let i = 0; i < parts.length; i++) {
-        if (i % 2 === 0) {
+        if (parts[i].series) {
             drawSeries(parts[i], x, y);
         } else {
             drawShunt(parts[i], x, y, yGround);
