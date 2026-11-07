@@ -20,13 +20,17 @@ function calculate() {
     const g = coefficients[type][order];
 
     let html = "<h3>Woofer (low-pass)</h3>";
+    const wooferParts = [];
+    const tweeterParts = [];
     for (let i = 0; i < g.length; i++) {
         if (i % 2 === 0) {
             const L = g[i] * wooferZ / w;
             html += "<p>L" + (i + 1) + " (series): " + (L * 1000).toFixed(2) + "mH</p>";
+            wooferParts.push({ kind: "L", label: "L" + (i + 1), value: (L * 1000).toFixed(2) + "mH"});
                 } else {
             const C = g[i] / (wooferZ * w);
             html += "<p>C" + (i + 1) + " (parallel): " + (C * 1000000).toFixed(2) + " &micro;F</p>"; 
+            wooferParts.push({ kind: "C", label: "C" + (i + 1), value: (C * 1000000).toFixed(2) + " \u00B5F"});
             }
         }
         html += "<h3>Tweeter (high-pass)</h3>";
@@ -34,9 +38,11 @@ function calculate() {
             if (i % 2 === 0) {
                 const C = 1 / (g[i] * tweeterZ * w);
                  html += "<p>C" + (i + 1) + " (series): " + (C * 1000000).toFixed(2) + "&micro;F</p>";
+                 tweeterParts.push({kind: "C", label: "C" + (i + 1), value: (C * 1000000).toFixed(2) + " u00B5F"});
                 } else {
                 const L = tweeterZ / (g[i] * w);
                 html += "<p>L" + (i + 1) + " (parallel): " + (L * 1000).toFixed(2) + "mH</p>";
+                tweeterParts.push({kind: "L", label: "L" + (i + 1), value: (L * 1000).toFixed(2) + " mH"});
          }
      }
 
@@ -44,6 +50,7 @@ document.getElementById("output").innerHTML = html;
 drawGrid();
 drawCurve(f, order, type, false, "#378ADD");
 drawCurve(f, order, type, true, "#D85A30");
+drawSchematic(wooferParts, tweeterParts, order === 2);
 }
 
 const coefficients = {
@@ -104,8 +111,7 @@ function drawGrid() {
         ctx.fillText(db + " dB", 5, y + 4);
     }
 }
-calculate();
-document.getElementById("settings").addEventListener("input", calculate);
+
 
 function filterDb(f, fc, order, type, highPass) {
     let ratio = f / fc;
@@ -142,3 +148,132 @@ function drawCurve(fc, order, type, highPass, color) {
     }
     ctx.stroke();
 }
+
+const sCanvas = document.getElementById("schematicCanvas");
+const sCtx = sCanvas.getContext("2d");
+
+function sLine(x1, y1, x2, y2) {
+    sCtx.beginPath();
+    sCtx.moveTo(x1, y1);
+    sCtx.lineTo(x2, y2);
+    sCtx.stroke();
+}
+function sDot(x, y) {
+    sCtx.beginPath();
+    sCtx.arc(x, y, 3, 0, 2 * Math.PI);
+    sCtx.fill();
+}
+function sCoil(x, y, vertical) {
+    for (let i= 0; i < 4; i++) {
+        sCtx.beginPath();
+        if (vertical) {
+            sCtx.arc(x, y + 6.25 + i * 12.5, 6.25, -Math.PI / 2, Math.PI / 2, true);
+        } else {
+            sCtx.arc(x + 6.25 + i * 12.5, y, 6.25, Math.PI, 0);
+        }
+        sCtx.stroke();
+    }
+}
+function drawSeries(part, x, y) {
+    if (part.kind === "L") {
+        sLine(x, y, x + 25, y);
+        sCoil(x + 25, y, false);
+        sLine(x + 75, y, x + 100, y);
+    } else {
+        sLine(x, y, x + 45, y);
+        sLine(x + 45, y - 15, x + 45, y + 15);
+        sLine(x + 55, y - 15, x + 55, y + 15);
+        sLine(x + 55, y, x + 100, y);
+    }
+    sCtx.textAlign = "center";
+    sCtx.fillText(part.label, x + 50, y - 36);
+    sCtx.fillText(part.value, x + 50, y - 20);
+}
+
+function drawShunt(part, x, y, yGround) {
+    const xm = x + 50;
+    sLine(x, y, x + 100, y);
+    if (part.kind === "L") {
+        sLine(xm, y, xm, y + 20);
+        sCoil(xm, y + 20, true);
+        sLine(xm, y + 70, xm, yGround);
+    } else {
+        sLine(xm, y, xm, y + 40);
+        sLine(xm - 15, y + 40, xm + 15, y + 40);
+        sLine(xm - 15, y + 50, xm + 15, y + 50);
+        sLine(xm, y + 50, xm, yGround);
+    }
+    sDot(xm, y);
+    sDot(xm, yGround);
+    sCtx.textAlign = "left";
+    sCtx.fillText(part.label, xm + 20, y + 42);
+    sCtx.fillText(part.value, xm + 20, y + 58);
+}
+
+function drawSpeaker(x, y, yGround, name, reversed) {
+    sLine(x, y, x + 30, y);
+    sLine(x + 30, y, x + 30, y + 25);
+    sCtx.strokeRect(x + 20, y + 25, 20, 40);
+    sCtx.beginPath();
+    sCtx.moveTo(x + 40, y + 25);
+    sCtx.lineTo(x + 60, y + 10);
+    sCtx.lineTo(x + 60, y + 80);
+    sCtx.lineTo(x + 40, y + 65);
+    sCtx.stroke();
+    sLine(x + 30, y + 65, x + 30, yGround);
+
+    sCtx.textAlign = "center";
+    if (reversed) {
+        sCtx.fillText("\u2212", x + 12, y + 38);
+        sCtx.fillText("+", x + 12, y + 62);
+    } else {
+        sCtx.fillText("+", x + 12, y + 38);
+        sCtx.fillText("\u2212", x + 12, y + 62);
+    }
+    sCtx.textAlign = "left";
+    sCtx.fillText(name, x + 70, y + 40);
+    if (reversed) {
+        sCtx.fillStyle = "#D85A30";
+        sCtx.fillText("reverse polarity!", x + 70, y + 58);
+        sCtx.fillStyle = "#333333";
+    }
+}
+
+function drawBranch(parts, y, title, name, reversed) {
+    const yGround = y + 90;
+    let x = 60;
+
+    sCtx.textAlign = "left";
+    sCtx.fillText(title, 10, y - 55);
+
+    sLine(30, y, x, y);
+    sDot(30, y);
+    sDot(30, yGround);
+    sCtx.fillText("+", 12, y + 4);
+    sCtx.fillText("\u2212", 12, yGround + 4);
+
+    for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+            drawSeries(parts[i], x, y);
+        } else {
+            drawShunt(parts[i], x, y, yGround);
+        }
+        x += 100;
+    }
+    sLine(30, yGround, x + 30, yGround);
+    drawSpeaker(x, y, yGround, name, reversed);
+}
+
+function drawSchematic(wooferParts, tweeterParts, tweeterReversed) {
+    sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
+    sCtx.strokeStyle = "#333333";
+    sCtx.fillStyle = "#333333";
+    sCtx.lineWidth = 2;
+    sCtx.font = "13px sans-serif";
+
+    drawBranch(wooferParts, 80, "Woofer (low-pass)", "Woofer", false);
+    drawBranch(tweeterParts, 250, "Tweeter (high-pass)", "Tweeter", tweeterReversed);
+}
+
+calculate();
+document.getElementById("settings").addEventListener("input", calculate);

@@ -2,7 +2,7 @@
     display: block;
     margin-top: 10px;
 }
-#graphCanvas {
+#graphCanvas, #schematicCanvas {
     max-width: 100%;
     border: 1px solid #cccccc;
 }
