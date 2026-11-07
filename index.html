@@ -15,8 +15,19 @@
    <main>
     <section id="settings">
         <h2>settings</h2>
-        <label for="freq">Crossover frequency (Hz)</label>
+        <label for="ways">Crossover type</label>
+        <select id="ways">
+            <option value="2" selected>2-way</option>
+            <option value="3">3-way</option>
+        </select>
+        <label for="freq" id="freqLabel">Crossover frequency (Hz)</label>
         <input type="number" id="freq" value="2500" min="20" max="20000">
+        <div id="threeWay">
+            <label for="freq2">High crossover frequency (Hz)</label>
+            <input type="number" id="freq2" value="3000" min="20" max="20000">
+            <label for="midZ">Midrange impedance (&Omega;)</label>
+            <input type="number" id="midZ" value="8" min="1" max="32">
+        </div>
         <label for="WooferZ">Woofer impedance (&Omega;)</label>
         <input type="number" id="wooferZ" value="8" min="1" max="32">
         <label for="tweeterZ">Tweeter impedance (&Omega;)</label>

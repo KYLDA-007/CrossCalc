@@ -1,4 +1,12 @@
 function calculate() {
+    const ways = Number(document.getElementById("ways").value);
+    if (ways ===3) {
+        document.getElementById("threeWay").style.display = "block";
+        document.getElementById("freqLabel").textContent = "Low crossover frequency (Hz)";
+    } else {
+        document.getElementById("threeWay").style.display = "none";
+        document.getElementById("freqLabel").textContent = "Crossover frequency (Hz)";
+    }
     const f = Number(document.getElementById("freq").value);
     const wooferZ = Number(document.getElementById("wooferZ").value);
     const tweeterZ = Number(document.getElementById("tweeterZ").value);
@@ -38,7 +46,7 @@ function calculate() {
             if (i % 2 === 0) {
                 const C = 1 / (g[i] * tweeterZ * w);
                  html += "<p>C" + (i + 1) + " (series): " + (C * 1000000).toFixed(2) + "&micro;F</p>";
-                 tweeterParts.push({kind: "C", label: "C" + (i + 1), value: (C * 1000000).toFixed(2) + " u00B5F"});
+                 tweeterParts.push({kind: "C", label: "C" + (i + 1), value: (C * 1000000).toFixed(2) + " \u00B5F"});
                 } else {
                 const L = tweeterZ / (g[i] * w);
                 html += "<p>L" + (i + 1) + " (parallel): " + (L * 1000).toFixed(2) + "mH</p>";
@@ -260,6 +268,8 @@ function drawBranch(parts, y, title, name, reversed) {
         }
         x += 100;
     }
+    sLine(x, y, x + 40, y);
+    x += 40;
     sLine(30, yGround, x + 30, yGround);
     drawSpeaker(x, y, yGround, name, reversed);
 }
