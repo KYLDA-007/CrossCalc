@@ -27,16 +27,41 @@ function calculate() {
     }
     const g = coefficients[type][order];
 
-const wooferParts = lowPassParst(g, wooferZ, w, 1);
-const tweeterParts = highPassParts(g, tweeterZ, w, 1);
-let html = partsToHtml("Woofer (low-pass)", wooferParts);
-html += partsToHtml("Tweeter (high-pass)", tweeterParts);
+const f2 = Number(document.getElementById("freq2").value);
+const midZ = Number(document.getElementById("midZ").value);
+const w2 = 2 * Math.PI * f2;
+
+let wooferParts;
+let midParts = [];
+let tweeterParts;
+let html;
+
+if (ways === 3) {
+    wooferParts = lowPassParst(g, wooferZ, w, 1);
+    midParts = highPassParts(g, midZ, w, 1).concat(lowPassParst(g, midZ, w2, g.length + 1));
+    tweeterParts = highPassParts(g, tweeterZ, w2, 1);
+    html = partsToHtml("Woofer (low-pass)", wooferParts);
+    html += partsToHtml("Midrange (band-pass)", midParts);
+    html += partsToHtml("Tweeter (high-pass", tweeterParts);
+} else {
+    wooferParts = lowPassParst(g, wooferZ, w, 1);
+    tweeterParts = highPassParts(g, tweeterZ, w, 1);
+    html = partsToHtml("Woofer (low-pass)", wooferParts);
+    html += partsToHtml("Tweeter (high-pass)", tweeterParts);
+}
 
 document.getElementById("output").innerHTML = html;
 drawGrid();
-drawCurve(f, order, type, false, "#378ADD");
-drawCurve(f, order, type, true, "#D85A30");
-drawSchematic(wooferParts, tweeterParts, order === 2);
+if (ways === 3) {
+    drawCurve(f, order, type, false, "#378ADD");
+    drawBandCurve(f, f2, order, type, "#1D9E75");
+    drawCurve(f2, order, type, true, "#D85A30");
+} else {
+    drawCurve(f, order, type, false, "#378ADD");
+    drawCurve(f, order, type, true, "#D85A30")
+}
+drawSchematic(wooferParts, midParts, tweeterParts, order === 2);
+
 }
 
 const coefficients = {
@@ -84,7 +109,7 @@ function highPassParts(g, R, w, startNumber) {
 }
 
 function partsToHtml(title, parts) {
-    let html = "<h3>" + title + "<h3>";
+    let html = "<h3>" + title + "</h3>";
     for (const part of parts) {
         let position = "parallel";
         if (part.series) {
@@ -175,6 +200,29 @@ function drawCurve(fc, order, type, highPass, color) {
             ctx.lineTo(x, y);
         }
     }
+    ctx.stroke();
+}
+
+function drawBandCurve(flow, fHigh, order, type, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+
+    const points = 400;
+    for (let i = 0; i <= points; i++) {
+        const f = graph.fMin * Math.pow(graph.fMax / graph.fMin, i / points);
+        let db = filterDb(f, flow, order, type, true) + filterDb(f, fHigh, order, type, false);
+        if (db < graph.dbMin) {
+            db = graph.dbMin;
+        }
+        const x = freqToX(f);
+        const y = dbToY(db);
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    } 
     ctx.stroke();
 }
 
@@ -295,15 +343,25 @@ function drawBranch(parts, y, title, name, reversed) {
     drawSpeaker(x, y, yGround, name, reversed);
 }
 
-function drawSchematic(wooferParts, tweeterParts, tweeterReversed) {
+function drawSchematic(wooferParts, midParts, tweeterParts, flip) {
+    const maxParts = Math.max(wooferParts.length, midParts.length, tweeterParts.length);
+    sCanvas.width = 60 + maxParts * 100 + 240;
+    sCanvas.height = midParts.length > 0 ? 530 : 360;
+
     sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
     sCtx.strokeStyle = "#333333";
     sCtx.fillStyle = "#333333";
     sCtx.lineWidth = 2;
     sCtx.font = "13px sans-serif";
 
-    drawBranch(wooferParts, 80, "Woofer (low-pass)", "Woofer", false);
-    drawBranch(tweeterParts, 250, "Tweeter (high-pass)", "Tweeter", tweeterReversed);
+    if (midParts.length > 0) {
+        drawBranch(wooferParts, 80, "Woofer (low-pass)", "Woofer", false);
+        drawBranch(midParts, 250, "Midrange (band-pass)", "Midrange", flip);
+        drawBranch(tweeterParts, 420, "Tweeter (high-pass)", "Tweeter", false);
+    } else {
+        drawBranch(wooferParts, 80, "Woofer (low-pass)", "Woofer", false);
+        drawBranch(tweeterParts, 250, "Tweeter (high-pass)", "Tweeter", flip);
+    }
 }
 
 calculate();
