@@ -21,7 +21,7 @@ function calculate() {
     }
     let type = document.getElementById("filterType").value;
     const w = 2 * Math.PI * f;
-     
+
     if (coefficients[type][order] === undefined) {
         type = "butterworth";
     }
@@ -30,6 +30,15 @@ function calculate() {
 const f2 = Number(document.getElementById("freq2").value);
 const midZ = Number(document.getElementById("midZ").value);
 const w2 = 2 * Math.PI * f2;
+    let warning = "";
+    if (ways === 3) {
+        if (f2 <= f) {
+            warning = "High crossover frequency must be higher than low crossover frequency.";
+        } else if (f2 / f < 4) {
+            warning = "Crossover frequencies are less than 2 octaves apart. The midrange filters will affect each other.";
+        }
+    }
+    document.getElementById("warning").textContent = warning;
 
 let wooferParts;
 let midParts = [];

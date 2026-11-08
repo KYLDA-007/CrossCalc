@@ -13,52 +13,56 @@
    </header>
 
    <main>
-    <section id="settings">
-        <h2>settings</h2>
-        <label for="ways">Crossover type</label>
-        <select id="ways">
-            <option value="2" selected>2-way</option>
-            <option value="3">3-way</option>
-        </select>
-        <label for="freq" id="freqLabel">Crossover frequency (Hz)</label>
-        <input type="number" id="freq" value="2500" min="20" max="20000">
-        <div id="threeWay">
-            <label for="freq2">High crossover frequency (Hz)</label>
-            <input type="number" id="freq2" value="3000" min="20" max="20000">
-            <label for="midZ">Midrange impedance (&Omega;)</label>
-            <input type="number" id="midZ" value="8" min="1" max="32">
-        </div>
-        <label for="WooferZ">Woofer impedance (&Omega;)</label>
-        <input type="number" id="wooferZ" value="8" min="1" max="32">
-        <label for="tweeterZ">Tweeter impedance (&Omega;)</label>
-        <input type="number" id="tweeterZ" value="8" min="1" max="32">
-        <label for="slope">Slope</label>
-        <select id="slope">
-            <option value="1">6dB/oct (1st)</option>
-            <option value="2" selected>12dB/oct (2st)</option>
-            <option value="3">18dB/oct (3st)</option>
-            <option value="4">24dB/oct (4st)</option>
-        </select>
-        <label for="filterType">Filter Type</label>
-        <select id="filterType">
-            <option value="butterworth">Butterworth</option>
-            <option value="linkwitz" selected>Linkwitz-Riley</option> 
-        </select>
-    </section>
+    <div class="top">
+            <section id="settings">
+                <h2>Settings</h2>
+                <label for="ways">Crossover type</label>
+                <select id="ways">
+                    <option value="2" selected>2-way</option>
+                    <option value="3">3-way</option>
+                </select>
+                <label for="freq" id="freqLabel">Crossover frequency (Hz)</label>
+                <input type="number" id="freq" value="2500" min="20" max="20000">
+                <div id="threeWay">
+                    <label for="freq2">High crossover frequency (Hz)</label>
+                    <input type="number" id="freq2" value="3000" min="20" max="20000">
+                    <label for="midZ">Midrange impedance (&Omega;)</label>
+                    <input type="number" id="midZ" value="8" min="1" max="32">
+                </div>
+                <label for="wooferZ">Woofer impedance (&Omega;)</label>
+                <input type="number" id="wooferZ" value="8" min="1" max="32">
+                <label for="tweeterZ">Tweeter impedance (&Omega;)</label>
+                <input type="number" id="tweeterZ" value="8" min="1" max="32">
+                <label for="slope">Slope</label>
+                <select id="slope">
+                    <option value="1">6dB/oct (1st)</option>
+                    <option value="2" selected>12dB/oct (2nd)</option>
+                    <option value="3">18dB/oct (3rd)</option>
+                    <option value="4">24dB/oct (4th)</option>
+                </select>
+                <label for="filterType">Filter Type</label>
+                <select id="filterType">
+                    <option value="butterworth">Butterworth</option>
+                    <option value="linkwitz" selected>Linkwitz-Riley</option> 
+                </select>
+                <p id="warning"></p>
+            </section>
 
-    <section id="graph">
-        <h2>Frequency response</h2>
-        <canvas id="graphCanvas" width="800" height="400"></canvas>
-    </section>
+            <section id="graph">
+                <h2>Frequency response</h2>
+                <canvas id="graphCanvas" width="800" height="400"></canvas>
+            </section>
+        
 
-    <section id="schematic">
-        <h2>Schematic</h2>
-        <canvas id="schematicCanvas" width="700" height="360"></canvas>
-    </section>
-    <section id="results">
-        <h2>Component values</h2>
-        <div id="output"></div>
-    </section>
+        <section id="schematic">
+            <h2>Schematic</h2>
+            <canvas id="schematicCanvas" width="700" height="360"></canvas>
+        </section>
+        <section id="results">
+            <h2>Component values</h2>
+            <div id="output"></div>
+        </section>
+    </div>
 
 
    </main>
