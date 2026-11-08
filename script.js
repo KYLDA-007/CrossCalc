@@ -126,15 +126,21 @@ function highPassParts(g, R, w, startNumber) {
     return parts;
 }
 
-function partsToHtml(title, parts) {
-    let html = "<h3>" + title + "</h3>";
+function partsToHtml(title, parts, cssClass) {
+    let html = "<div class='group " + cssClass + "'>";
+    html = "<h3>" + title + "</h3>";
     for (const part of parts) {
         let position = "parallel";
         if (part.series) {
             position = "series";
         }
-        html += "<p>" + part.label + "(" + position + "): " + part.value + "</p>";
+        html += "<div class='row'>";
+        html += "<span class='name'>" + part.label + "</span>";
+        html += "<span class='pos'>" + position + "</span>";
+        html += "<span class='value'>" + part.value + "</span>";
+        html += "</div>";
     }
+    html += "</div>";
     return html;
 }
 function cssVar(name) {
