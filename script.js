@@ -1,5 +1,6 @@
 function calculate() {
     const ways = Number(document.getElementById("ways").value);
+    canvas.height = ways === 3 ? 480 : 400;
     if (ways ===3) {
         document.getElementById("threeWay").style.display = "block";
         document.getElementById("freqLabel").textContent = "Low crossover frequency (Hz)";
@@ -136,6 +137,9 @@ function partsToHtml(title, parts) {
     }
     return html;
 }
+function cssVar(name) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
 
 const canvas = document.getElementById("graphCanvas");
 const ctx = canvas.getContext("2d");
@@ -158,8 +162,8 @@ function dbToY(db) {
 }
 function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "#dddddd";
-    ctx.fillStyle = "#555555";
+    ctx.strokeStyle = cssVar("--grid");
+    ctx.fillStyle = cssVar("--muted");
     ctx.font = "12px sans-serif"
     ctx.lineWidth = 1;
 
@@ -366,8 +370,8 @@ function drawSchematic(wooferParts, midParts, tweeterParts, flip) {
     sCanvas.height = midParts.length > 0 ? 530 : 360;
 
     sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
-    sCtx.strokeStyle = "#333333";
-    sCtx.fillStyle = "#333333";
+    sCtx.strokeStyle = cssVar("--line");
+    sCtx.fillStyle = cssVar("--line");
     sCtx.lineWidth = 2;
     sCtx.font = "13px sans-serif";
 
@@ -380,6 +384,15 @@ function drawSchematic(wooferParts, midParts, tweeterParts, flip) {
         drawBranch(tweeterParts, 250, "Tweeter (high-pass)", "Tweeter", flip);
     }
 }
-
+document.getElementById("themeToggle").addEventListener("click", function () {
+    document.body.classList.toggle("dark");
+    const button = document.getElementById("themeToggle");
+    if (document.body.classList.contains("dark")) {
+        button.textContent = "Light mode";
+    } else {
+        button.textContent = "Dark mode";
+    }
+    calculate();
+})
 calculate();
 document.getElementById("settings").addEventListener("input", calculate);
