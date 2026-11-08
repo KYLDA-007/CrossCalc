@@ -103,3 +103,6 @@
         "results";
     }
  }
+ #graphCanvas {
+    width: 100%;
+ }

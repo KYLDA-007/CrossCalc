@@ -30,6 +30,14 @@ function calculate() {
 const f2 = Number(document.getElementById("freq2").value);
 const midZ = Number(document.getElementById("midZ").value);
 const w2 = 2 * Math.PI * f2;
+if (!(f > 0) || !(wooferZ > 0) || !(tweeterZ > 0) || (ways === 3 && (!(f2 > 0) || !(midZ > 0)))) {
+    document.getElementById("warning").textContent = "Fill in all fields with numbers greater than 0.";
+    return;
+}
+if (f < 20 || f > 20000 || (ways === 3 && (f2 < 20 || f2 > 20000))) {
+    document.getElementById("warning").textContent = "Crossover frequency must be between 20Hz 20KHZ.";
+    return;
+}
     let warning = "";
     if (ways === 3) {
         if (f2 <= f) {
